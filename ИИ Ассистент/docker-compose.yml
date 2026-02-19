@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  telegram-bot:
+    build: .
+    container_name: telegram-bot
+    restart: unless-stopped
+    
+    # Переменные окружения
+    environment:
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - OPENAI_PROXY_API_URL=${OPENAI_PROXY_API_URL:-https://api.proxyapi.ru/openai/v1}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4o-mini}
+      - GOOGLE_SHEETS_CREDENTIALS_FILE=/app/credentials.json
+      - GOOGLE_SHEETS_SPREADSHEET_ID=${GOOGLE_SHEETS_SPREADSHEET_ID}
+      - CHROMA_DB_PATH=/app/chroma_db
+      - EMBEDDING_MODEL=${EMBEDDING_MODEL:-paraphrase-multilingual-MiniLM-L12-v2}
+    
+    # Volumes для сохранения данных
+    volumes:
+      # Векторная база данных (из родительской директории)
+      - ../chroma_db:/app/chroma_db
+      # Логи
+      - ./logs:/app/logs
+      # Google Sheets credentials
+      - ./credentials.json:/app/credentials.json:ro
+    
+    # Логирование
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
